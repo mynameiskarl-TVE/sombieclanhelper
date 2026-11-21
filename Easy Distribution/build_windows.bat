@@ -73,12 +73,11 @@ if not exist "%DIST%\SombieCompanion.exe" goto fail
 
 del /q "%DIST%\love.exe"
 copy /y "%ROOT%\SombieCompanion\README.txt" "%DIST%\ABOUT.txt" >nul
+if errorlevel 1 goto fail
 copy /y "%~dp0START_HERE.txt" "%DIST%\START_HERE.txt" >nul
+if errorlevel 1 goto fail
 copy /y "%~dp0Start Sombie Companion.bat" "%DIST%\Start Sombie Companion.bat" >nul
-if errorlevel 1 (
-  echo ERROR: Could not copy the launcher or readme files.
-  goto fail
-)
+if errorlevel 1 goto fail
 
 if exist "%STAGE%" rmdir /s /q "%STAGE%"
 echo.
