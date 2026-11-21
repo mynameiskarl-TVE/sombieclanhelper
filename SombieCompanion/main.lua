@@ -2,9 +2,9 @@ local json = require("json")
 
 local W, H = 1100, 720
 local sidebar = 205
-local tabs = {"Dashboard", "Events", "Members", "Projects", "Resources", "Missions"}
+local tabs = {"Dashboard", "Events", "Members", "Projects", "Resources", "Missions", "Files", "Sheets"}
 local active = "Dashboard"
-local data = {events={}, members={}, projects={}, resources={}, missions={}}
+local data = {events={}, members={}, projects={}, resources={}, missions={}, spreadsheets={}}
 local selected = nil
 local selectedKey = nil
 local modal = nil
@@ -12,12 +12,15 @@ local buttons = {}
 local notice, noticeTimer = "", 0
 local font, smallFont, titleFont, tinyFont
 local imageCache = {}
+local sheetIndex, sheetRow, sheetCol = 1, 1, 1
+local sheetTyping = false
+local fileEntries = {}
 
 local C = {
-    bg={0.965,0.957,0.949}, white={1,1,1}, palePink={0.976,0.925,0.929},
-    paleBlue={0.902,0.941,0.957}, line={0.835,0.867,0.878},
-    pink={0.843,0.635,0.698}, blue={0.486,0.635,0.702}, peach={0.976,0.835,0.761},
-    text={0.247,0.286,0.310}, muted={0.475,0.525,0.549}, green={0.48,0.68,0.55},
+    bg={0.88,0.82,0.83}, white={0.91,0.84,0.85}, palePink={0.84,0.70,0.74},
+    paleBlue={0.75,0.79,0.83}, line={0.68,0.59,0.62},
+    pink={0.72,0.46,0.55}, blue={0.43,0.55,0.63}, peach={0.83,0.61,0.53},
+    text={0.22,0.18,0.20}, muted={0.39,0.33,0.36}, green={0.38,0.56,0.46},
     red={0.75,0.42,0.42}, yellow={0.75,0.61,0.36}
 }
 
@@ -56,7 +59,7 @@ local function saveData()
     else notify("Save failed: "..tostring(encoded)) end
 end
 local function ensureShape()
-    for _,k in ipairs({"events","members","projects","resources","missions"}) do
+    for _,k in ipairs({"events","members","projects","resources","missions","spreadsheets"}) do
         if type(data[k])~="table" then data[k]={} end
     end
     for _,p in ipairs(data.projects) do p.notes=p.notes or ""; p.tasks=p.tasks or {}; p.attachments=p.attachments or {} end
@@ -205,6 +208,88 @@ local function drawSidebar()
     line(20,H-82,sidebar-20,H-82)
     txt("Offline mode",23,H-65,smallFont,C.pink); txt("Data stays on this PC",23,H-45,smallFont,C.muted)
 end
+local function collectAttachments()
+    local out={}
+    for _,key in ipairs({"events","projects","resources","missions"}) do
+        for _,rec in ipairs(data[key] or {}) do
+            for _,att in ipairs(rec.attachments or {}) do
+                out[#out+1]={att=att,owner=rec.name or "Untitled",kind=key}
+            end
+        end
+    end
+    return out
+end
+local function currentSheet()
+    if not data.spreadsheets then data.spreadsheets={} end
+    if #data.spreadsheets==0 then
+        data.spreadsheets[1]={name="New spreadsheet",rows={{"Item","Quantity","Notes"},{"","",""},{"","",""},{"","",""}}}
+    end
+    sheetIndex=math.max(1,math.min(sheetIndex,#data.spreadsheets))
+    local sh=data.spreadsheets[sheetIndex]
+    sh.rows=sh.rows or {{"","",""},{"","",""},{"","",""}}
+    return sh
+end
+local function drawFilesPage()
+    local x=sidebar+28; local y=110; local width=W-sidebar-56
+    txt("Attachment browser",x,y,titleFont,C.blue)
+    txt("Browse every file copied into this app, regardless of which section it belongs to.",x,y+36,smallFont,C.muted)
+    fileEntries=collectAttachments()
+    rect(x,184,width,38,C.palePink,C.line)
+    txt(tostring(#fileEntries).." stored files",x+14,195,font,C.text)
+    if #fileEntries==0 then
+        rect(x,235,width,90,C.white,C.line)
+        txt("No attachments yet.",x+16,254,font,C.text)
+        txt("Open a project, event, resource or mission and use Add attachment.",x+16,280,smallFont,C.muted)
+    else
+        local maxVisible=math.floor((H-250)/58)
+        for i=1,math.min(#fileEntries,maxVisible) do
+            local entry=fileEntries[i]; local a=entry.att; local yy=235+(i-1)*58
+            rect(x,yy,width,50,C.white,C.line)
+            local img=imageFor(a)
+            if img then
+                local iw,ih=img:getDimensions(); local sc=math.min(36/iw,36/ih)
+                love.graphics.setColor(1,1,1); love.graphics.draw(img,x+9,yy+7,0,sc,sc)
+            else
+                rect(x+9,yy+7,36,36,C.paleBlue,C.line); txt("FILE",x+12,yy+19,tinyFont,C.blue)
+            end
+            txt(short(a.label or a.filename or "Attachment",42),x+56,yy+7,font,C.text)
+            txt(entry.kind.."  /  "..short(entry.owner,35).."  /  "..(a.filename or ""),x+56,yy+29,tinyFont,C.muted)
+            addButton("Open",W-155,yy+10,76,30,function() openAttachment(a) end,"blue")
+        end
+    end
+end
+local function drawSheetsPage()
+    local x=sidebar+28; local y=108; local width=W-sidebar-56
+    local sh=currentSheet()
+    txt("Editable spreadsheets",x,y,titleFont,C.blue)
+    txt("Simple local tables. Click a cell, type to edit, and use the arrow keys to move.",x,y+34,smallFont,C.muted)
+    addButton("+ New sheet",W-170,y,112,30,function()
+        data.spreadsheets[#data.spreadsheets+1]={name="Spreadsheet "..(#data.spreadsheets+1),rows={{"Column 1","Column 2","Column 3"},{"","",""},{"","",""}}}
+        sheetIndex=#data.spreadsheets; sheetRow=1; sheetCol=1; saveData()
+    end,"primary")
+    addButton("Add row",x,y+66,82,28,function()
+        local n=#(sh.rows[1] or {}); local r={}; for c=1,n do r[c]="" end
+        sh.rows[#sh.rows+1]=r; saveData()
+    end,"blue")
+    addButton("Add column",x+91,y+66,96,28,function()
+        for _,r in ipairs(sh.rows) do r[#r+1]="" end; saveData()
+    end,"blue")
+    addButton("Prev sheet",x+198,y+66,88,28,function() sheetIndex=math.max(1,sheetIndex-1); sheetRow=1; sheetCol=1 end,"blue")
+    addButton("Next sheet",x+294,y+66,88,28,function() sheetIndex=math.min(#data.spreadsheets,sheetIndex+1); sheetRow=1; sheetCol=1 end,"blue")
+    txt(sh.name or "Spreadsheet",x+400,y+72,font,C.text)
+    local gx=x; local gy=y+112; local cw=math.min(160,math.floor(width/5)); local ch=34
+    local rows=math.min(#sh.rows,math.floor((H-gy-28)/ch)); local cols=math.min(#(sh.rows[1] or {}),math.floor(width/cw))
+    for r=1,rows do
+        for c=1,cols do
+            local xx=gx+(c-1)*cw; local yy=gy+(r-1)*ch
+            local chosen=(sheetRow==r and sheetCol==c)
+            rect(xx,yy,cw,ch,chosen and C.palePink or (r==1 and C.paleBlue or C.white),C.line)
+            local val=((sh.rows[r] or {})[c] or "")
+            txt(short(val,math.max(5,math.floor(cw/7))),xx+7,yy+10,smallFont,C.text)
+        end
+    end
+    txt("Tip: spreadsheet data is saved locally with your clan data. CSV import/export can be added next.",x,gy+rows*ch+12,tinyFont,C.muted)
+end
 local function drawDashboard()
     local x=sidebar+28; local y=110; local gap=14; local cw=(W-sidebar-70-gap*2)/3
     local cards={{"Members",#data.members,C.pink},{"Events",#data.events,C.blue},{"Projects",#data.projects,C.peach}}
@@ -334,6 +419,8 @@ function love.draw()
     W,H=love.graphics.getDimensions(); set(C.bg); love.graphics.rectangle("fill",0,0,W,H); buttons={}
     drawSidebar(); drawHeader()
     if active=="Dashboard" then drawDashboard()
+    elseif active=="Files" then drawFilesPage()
+    elseif active=="Sheets" then drawSheetsPage()
     else
         local k=keyForTab()
         if selected and selectedKey==k and data[k][selected] then drawDetail(k,data[k][selected]) else selected=nil; selectedKey=nil; drawListPage(k) end
@@ -358,14 +445,36 @@ function love.mousepressed(x,y,b)
         return
     end
     if x<sidebar then
-        for i,t in ipairs(tabs) do local yy=108+(i-1)*48; if y>=yy-7 and y<=yy+32 then active=t; selected=nil; selectedKey=nil; return end end
+        for i,t in ipairs(tabs) do local yy=108+(i-1)*43; if y>=yy-7 and y<=yy+32 then active=t; selected=nil; selectedKey=nil; return end end
+    end
+    if active=="Sheets" and not modal then
+        local x0=sidebar+28; local gy=108+112; local cw=math.min(160,math.floor((W-sidebar-56)/5)); local ch=34
+        local sh=currentSheet()
+        local r=math.floor((y-gy)/ch)+1; local c=math.floor((x-x0)/cw)+1
+        if y>=gy and r<=#sh.rows and x>=x0 and c<=#(sh.rows[1] or {}) then
+            sheetRow=r; sheetCol=c; sheetTyping=true; return
+        end
     end
     for i=#buttons,1,-1 do local binfo=buttons[i]; if x>=binfo.x and x<=binfo.x+binfo.w and y>=binfo.y and y<=binfo.y+binfo.h then if binfo.fn then binfo.fn() end; return end end
 end
 function love.textinput(t)
-    if modal then local f=modal.fields[modal.focus]; if f then f.value=(f.value or "")..t end end
+    if modal then local f=modal.fields[modal.focus]; if f then f.value=(f.value or "")..t end
+    elseif active=="Sheets" and sheetTyping then
+        local sh=currentSheet(); sh.rows[sheetRow]=sh.rows[sheetRow] or {}
+        local old=sh.rows[sheetRow][sheetCol] or ""
+        sh.rows[sheetRow][sheetCol]=old..t
+    end
 end
 function love.keypressed(key)
+    if not modal and active=="Sheets" and sheetTyping then
+        local sh=currentSheet()
+        if key=="backspace" then local v=sh.rows[sheetRow][sheetCol] or ""; sh.rows[sheetRow][sheetCol]=v:sub(1,-2); return
+        elseif key=="return" or key=="kpenter" or key=="down" then sheetRow=math.min(#sh.rows,sheetRow+1); return
+        elseif key=="up" then sheetRow=math.max(1,sheetRow-1); return
+        elseif key=="left" then sheetCol=math.max(1,sheetCol-1); return
+        elseif key=="right" or key=="tab" then sheetCol=math.min(#(sh.rows[1] or {}),sheetCol+1); return
+        elseif key=="escape" then sheetTyping=false; saveData(); return end
+    end
     if modal then
         local f=modal.fields[modal.focus]
         if key=="escape" then modal=nil
