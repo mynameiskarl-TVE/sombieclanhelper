@@ -25,7 +25,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
-          & cmd.exe /d /c '"Easy Distribution\build_portable_zip.bat"'
+          & cmd.exe /d /c '""Easy Distribution\build_portable_zip.bat""'
           if ($LASTEXITCODE -ne 0) {
             throw "The Windows packaging script failed with exit code $LASTEXITCODE."
           }
@@ -44,6 +44,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: SombieCompanion-Windows
-          path: Easy Distribution/SombieCompanion-Windows.zip
+          path: Easy Distribution/dist/**
           if-no-files-found: error
           retention-days: 30
