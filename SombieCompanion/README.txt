@@ -32,14 +32,15 @@ The Sheets tab provides editable local tables saved with the clan data.
 This is a lightweight table editor, not a full Excel replacement. CSV import,
 CSV export, formulas and XLSX editing are not included yet.
 
-WINDOWS PORTABLE VERSION
-The Easy Distribution folder contains build scripts. On the build computer,
-install LÖVE 11.4 or newer and run build_portable_zip.bat. It creates one
-SombieCompanion-Windows.zip containing the app and the required LÖVE runtime.
-Send that ZIP to the recipient. They extract it and double-click
-"Start Sombie Companion.bat" or "SombieCompanion.exe". Recipients do not need
-to install LÖVE or Lua separately. Keep the extracted runtime DLL files beside
-the EXE.
+WINDOWS PORTABLE INSTALLER
+Run build_portable_zip.bat in the Easy Distribution folder on Windows. It
+automatically downloads the official portable LÖVE 11.5 runtime ZIP if a usable
+runtime is not already available. It does not install LÖVE into Windows.
+
+Send SombieCompanion-Windows.zip to the recipient. They extract it, double-click
+"Install Sombie Companion.bat", and press ENTER. The installer copies the app
+and runtime files, creates a desktop shortcut, and launches it. The recipient
+does not need LÖVE or Lua installed and does not need internet.
 
 DATA AND PRIVACY
 All records and copied attachments stay in the local LÖVE save directory.
@@ -50,4 +51,4 @@ before moving computers or reinstalling. The app identity remains
 NOTES / LIMITATIONS
 - No live Sombie game integration or automatic player/server lookup.
 - Data is personal to each installation; no sharing or synchronisation.
-- Windows EXE builds must be made on Windows using the supplied scripts.
+- Windows EXE builds are for Windows PCs.
