@@ -1,42 +1,35 @@
-SOMBIE CLAN COMPANION - WINDOWS PORTABLE BUILD
+SOMBIE CLAN COMPANION - WINDOWS DISTRIBUTION
+
+EASIEST OPTION
+A GitHub Actions workflow builds the Windows ZIP automatically whenever the
+app or packaging files change. Open the repository's Actions tab, select
+"Build Sombie Companion for Windows", open the latest successful run, and
+download the "SombieCompanion-Windows" artifact.
+
+BUILD ON YOUR OWN WINDOWS PC
+1. Run build_portable_zip.bat.
+2. It uses an installed LÖVE runtime if available.
+3. If it cannot find one, it downloads the official portable LÖVE 11.5 ZIP.
+4. It creates SombieCompanion-Windows.zip in this folder.
+
+You do not need to install LÖVE just to build. The build script downloads the
+portable runtime ZIP and uses it without installing it into Windows.
 
 WHAT TO SEND
-Run build_portable_zip.bat on a Windows computer. It creates:
-  SombieCompanion-Windows.zip
+Send only SombieCompanion-Windows.zip.
 
-Send that single ZIP file to the person receiving the app.
+RECIPIENT SETUP
+1. Extract the ZIP.
+2. Double-click "Install Sombie Companion.bat".
+3. Press ENTER when prompted.
 
-HOW TO BUILD
-1. Install LÖVE 11.4 or newer on the computer making the build.
-2. Double-click build_portable_zip.bat.
-3. The completed ZIP will be in this folder.
+The installer copies the application and runtime to the user's local Programs
+folder, creates a desktop shortcut, and launches the app. The recipient does
+not need LÖVE, Lua, administrator permission, or internet.
 
-The build computer needs LÖVE installed. The person receiving the ZIP does NOT.
-The ZIP contains the game, the LÖVE runtime and its supporting DLL files.
+The ZIP contains the fused SombieCompanion.exe and matching runtime DLLs.
+Keep those runtime files together. This follows the official LÖVE Windows
+distribution approach.
 
-HOW THE RECIPIENT RUNS IT
-1. Right-click the ZIP and choose Extract All.
-2. Open the extracted folder.
-3. Double-click "Start Sombie Companion.bat" or "SombieCompanion.exe".
-
-Keep the extracted files together. Do not move the EXE away from its DLL files.
-The app can be launched directly; no internet connection or separate Lua/LÖVE
-installation is required.
-
-BUILDING THE FOLDER ONLY
-Run build_windows.bat to create the portable "dist" folder without making a ZIP.
-Share the entire dist folder, not just SombieCompanion.exe.
-
-If LÖVE is installed somewhere nonstandard, set LOVE_HOME to the folder
-containing love.exe and love.dll before running the build script. Example:
-  set "LOVE_HOME=C:\Program Files\LOVE"
-
-DATA
-Each person has their own local save data. The app does not connect to a server
-or synchronize between users. Save data is stored in the user's local LÖVE
-application-data directory, not inside the distribution folder.
-
-NOTES
-- Build the Windows version on Windows.
-- Keep all runtime DLLs and files beside SombieCompanion.exe.
-- Back up local clan data before replacing an older copy.
+Each person has their own local save data. No server or synchronization is
+used. Existing saves keep the same LÖVE identity: "sombie_companion".
