@@ -6,12 +6,9 @@ A personal companion app for Sombie players and especially clan leaders.
 Every ally runs their own local copy. There are no accounts, server, online
 clan network, subscriptions or automatic connection to Sombie.
 
-REQUIREMENTS
-- LÖVE 11.4 or newer (for running from source)
-
 RUN FROM SOURCE
-1. Install LÖVE from https://love2d.org/
-2. Drag the SombieCompanion folder onto love.exe, or run: love SombieCompanion
+For development, install LÖVE 11.4 or newer and drag the SombieCompanion
+folder onto love.exe, or run: love SombieCompanion
 
 FEATURES
 - Dashboard overview
@@ -20,33 +17,29 @@ FEATURES
 - Projects: descriptions, notes, checklist tasks and supporting files
 - Resources: current and target quantities, notes, category and attachments
 - Missions: objectives, rewards, notes and checklist tasks
-- Attachment browser: one place to browse attachments across projects, events,
-  resources and missions, with image thumbnails and an Open action
-- Local editable spreadsheet workspace: create sheets, add rows/columns, click
-  cells and type; use arrow keys / Tab to move between cells
+- Attachment browser across projects, events, resources and missions
+- Local editable spreadsheet workspace
 - Local JSON save file
 
 ATTACHMENTS
 Use the full file path in the attachment dialog. The app copies the selected
 file into its own local attachments folder. PNG/JPG images can be previewed.
-Files are listed together in the Files tab and can be opened with the computer's
-default application. Files can also be dragged onto an open event, project, resource or mission to
-attach them. A native file picker is not included yet, so the original path
-entry method remains available.
+Files can be dragged onto an open event, project, resource or mission.
+A native file picker is not included yet.
 
 SPREADSHEETS
-The Sheets tab provides editable local tables saved with the clan data. Click
-a cell and type; use arrow keys or Tab to move. Add rows and columns as needed.
+The Sheets tab provides editable local tables saved with the clan data.
 This is a lightweight table editor, not a full Excel replacement. CSV import,
-CSV export, formulas and XLSX editing are not included yet. Existing XLSX/CSV
-attachments can still be opened in an external spreadsheet program.
+CSV export, formulas and XLSX editing are not included yet.
 
-WINDOWS DISTRIBUTION
-Use the scripts in the separate "Easy Distribution" folder. On Windows, install
-LÖVE 11.4+, then run build_windows.bat. It creates a dist folder containing a
-fused SombieCompanion.exe and the LÖVE runtime files. Share the entire dist
-folder, or run build_portable_zip.bat to create a ZIP. Recipients do not need
-to install LÖVE separately.
+WINDOWS PORTABLE VERSION
+The Easy Distribution folder contains build scripts. On the build computer,
+install LÖVE 11.4 or newer and run build_portable_zip.bat. It creates one
+SombieCompanion-Windows.zip containing the app and the required LÖVE runtime.
+Send that ZIP to the recipient. They extract it and double-click
+"Start Sombie Companion.bat" or "SombieCompanion.exe". Recipients do not need
+to install LÖVE or Lua separately. Keep the extracted runtime DLL files beside
+the EXE.
 
 DATA AND PRIVACY
 All records and copied attachments stay in the local LÖVE save directory.
