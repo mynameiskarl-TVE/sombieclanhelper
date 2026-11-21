@@ -2,36 +2,40 @@
 setlocal
 title Create Sombie Clan Companion ZIP
 
-set "SOMBIE_NO_PAUSE=1"
 call "%~dp0build_windows.bat"
 if errorlevel 1 goto fail
 
 set "SOMBIE_DIST=%~dp0dist"
 set "SOMBIE_ZIP=%~dp0SombieCompanion-Windows.zip"
 
-echo Creating the shareable ZIP...
+if not exist "%SOMBIE_DIST%\SombieCompanion.exe" (
+  echo ERROR: The finished app EXE is missing. No ZIP will be made.
+  goto fail
+)
+if not exist "%SOMBIE_DIST%\Install Sombie Companion.bat" (
+  echo ERROR: The installer is missing. No ZIP will be made.
+  goto fail
+)
+
+echo.
+echo Creating the complete shareable ZIP...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; Add-Type -AssemblyName System.IO.Compression.FileSystem; if (Test-Path $env:SOMBIE_ZIP) { Remove-Item -LiteralPath $env:SOMBIE_ZIP -Force }; [System.IO.Compression.ZipFile]::CreateFromDirectory($env:SOMBIE_DIST, $env:SOMBIE_ZIP, [System.IO.Compression.CompressionLevel]::Optimal, $false)"
-if errorlevel 1 (
-  echo ERROR: Could not create the ZIP file.
-  goto fail
-)
-if not exist "%SOMBIE_ZIP%" (
-  echo ERROR: The ZIP file was not created.
-  goto fail
-)
+if errorlevel 1 goto fail
+if not exist "%SOMBIE_ZIP%" goto fail
+for %%F in ("%SOMBIE_ZIP%") do if %%~zF LSS 1000000 goto fail
 
 echo.
 echo ZIP BUILD COMPLETE:
 echo %SOMBIE_ZIP%
 echo.
-echo Send this ONE ZIP file to the other person.
-echo They must extract it first, then double-click Start Sombie Companion.bat
-echo or SombieCompanion.exe. They do not need to install LÖVE.
-pause
+echo SEND THIS ONE ZIP FILE.
+echo Recipient: extract it, double-click Install Sombie Companion.bat,
+echo and press ENTER. The app and runtime are included; no LÖVE install needed.
+if not defined SOMBIE_NO_PAUSE pause
 exit /b 0
 
 :fail
 echo.
-echo ZIP BUILD FAILED. Check the error messages above.
-pause
+echo ZIP BUILD FAILED. No finished shareable ZIP was produced.
+if not defined SOMBIE_NO_PAUSE pause
 exit /b 1
