@@ -30,8 +30,9 @@ ATTACHMENTS
 Use the full file path in the attachment dialog. The app copies the selected
 file into its own local attachments folder. PNG/JPG images can be previewed.
 Files are listed together in the Files tab and can be opened with the computer's
-default application. A native file picker is not included yet, so file paths
-are still entered manually when adding a new attachment.
+default application. Files can also be dragged onto an open event, project, resource or mission to
+attach them. A native file picker is not included yet, so the original path
+entry method remains available.
 
 SPREADSHEETS
 The Sheets tab provides editable local tables saved with the clan data. Click
