@@ -457,6 +457,23 @@ function love.mousepressed(x,y,b)
     end
     for i=#buttons,1,-1 do local binfo=buttons[i]; if x>=binfo.x and x<=binfo.x+binfo.w and y>=binfo.y and y<=binfo.y+binfo.h then if binfo.fn then binfo.fn() end; return end end
 end
+function love.filedropped(file)
+    if not selectedKey or not selected or not data[selectedKey] or not data[selectedKey][selected] then
+        notify("Open an entry first, then drop a file onto it")
+        return
+    end
+    local rec=data[selectedKey][selected]
+    local name=file:getFilename() or "dropped_file"
+    local safe=name:gsub("[^%w%._%-]","_")
+    local folder="attachments"; love.filesystem.createDirectory(folder)
+    local stored=folder.."/"..tostring(os.time()).."_"..safe
+    local ok=love.filesystem.write(stored,file:getString())
+    if not ok then notify("Could not save dropped file"); return end
+    rec.attachments=rec.attachments or {}
+    rec.attachments[#rec.attachments+1]={label=name,filename=name,file=stored}
+    saveData()
+    notify("Attachment added: "..name)
+end
 function love.textinput(t)
     if modal then local f=modal.fields[modal.focus]; if f then f.value=(f.value or "")..t end
     elseif active=="Sheets" and sheetTyping then
