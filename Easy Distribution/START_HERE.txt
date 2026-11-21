@@ -1,0 +1,21 @@
+SOMBIE CLAN COMPANION
+PORTABLE WINDOWS VERSION
+
+WELCOME
+This folder contains the complete app and the files it needs to run.
+
+TO START
+1. Extract the ZIP to a normal folder on your computer.
+2. Open the extracted folder.
+3. Double-click "Start Sombie Companion.bat" or "SombieCompanion.exe".
+
+You do NOT need to install LÖVE, Lua, or any other runtime separately.
+The required runtime files are already included.
+
+IMPORTANT
+Keep SombieCompanion.exe and the DLL files together in this folder.
+Do not try to run the app from inside the ZIP. Extract the ZIP first.
+
+YOUR DATA
+Your clan records and attachments are saved locally on your computer.
+They are not automatically shared with anyone else and are not sent to a server.
