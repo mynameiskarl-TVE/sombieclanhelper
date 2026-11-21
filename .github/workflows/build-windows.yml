@@ -38,7 +38,15 @@ jobs:
           if ($item.Length -lt 1000000) {
             throw "The generated ZIP is unexpectedly small ($($item.Length) bytes)."
           }
+
+          $dist = Join-Path $env:GITHUB_WORKSPACE "Easy Distribution\dist"
+          foreach ($file in @("SombieCompanion.exe", "love.dll", "Install Sombie Companion.bat", "Start Sombie Companion.bat")) {
+            if (!(Test-Path -LiteralPath (Join-Path $dist $file))) {
+              throw "The package is missing required file: $file"
+            }
+          }
           Write-Host "Created $($item.FullName) ($($item.Length) bytes)"
+          Write-Host "Validated the installer, fused executable and LÖVE runtime."
 
       - name: Upload ready-to-send ZIP
         uses: actions/upload-artifact@v7
