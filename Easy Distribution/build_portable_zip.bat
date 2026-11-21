@@ -1,6 +1,7 @@
 @echo off
 setlocal
 title Create Sombie Clan Companion ZIP
+set "SOMBIE_NO_PAUSE=1"
 
 call "%~dp0build_windows.bat"
 if errorlevel 1 goto fail
