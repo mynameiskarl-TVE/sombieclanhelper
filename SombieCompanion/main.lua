@@ -50,6 +50,16 @@ local function wrapped(s,x,y,maxWidth,f,c,lineHeight,maxLines)
     return #lines
 end
 local function short(s,n) s=tostring(s or ""); if #s>n then return s:sub(1,n-3).."..." end; return s end
+local function removeLastUtf8Char(value)
+    value=tostring(value or "")
+    local i=#value
+    while i>0 do
+        local byte=value:byte(i)
+        if byte<128 or byte>=192 then break end
+        i=i-1
+    end
+    return value:sub(1,math.max(0,i-1))
+end
 local function notify(s) notice=s; noticeTimer=2.6 end
 local function saveData()
     local ok, encoded=pcall(json.encode,data)
@@ -485,7 +495,7 @@ end
 function love.keypressed(key)
     if not modal and active=="Sheets" and sheetTyping then
         local sh=currentSheet()
-        if key=="backspace" then local v=sh.rows[sheetRow][sheetCol] or ""; sh.rows[sheetRow][sheetCol]=v:sub(1,-2); return
+        if key=="backspace" then local v=sh.rows[sheetRow][sheetCol] or ""; sh.rows[sheetRow][sheetCol]=removeLastUtf8Char(v); return
         elseif key=="return" or key=="kpenter" or key=="down" then sheetRow=math.min(#sh.rows,sheetRow+1); return
         elseif key=="up" then sheetRow=math.max(1,sheetRow-1); return
         elseif key=="left" then sheetCol=math.max(1,sheetCol-1); return
@@ -496,7 +506,7 @@ function love.keypressed(key)
         local f=modal.fields[modal.focus]
         if key=="escape" then modal=nil
         elseif key=="tab" then modal.focus=modal.focus%#modal.fields+1
-        elseif key=="backspace" and f then local p=utf8.offset(f.value or "",-1); if p then f.value=f.value:sub(1,p-1) end
+        elseif key=="backspace" and f then f.value=removeLastUtf8Char(f.value)
         elseif key=="return" or key=="kpenter" then
             if f and f.multiline and love.keyboard.isDown("lshift","rshift") then f.value=(f.value or "").."\n" else addRecord() end
         end
