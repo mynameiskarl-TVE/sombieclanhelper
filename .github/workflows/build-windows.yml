@@ -1,0 +1,49 @@
+name: Build Sombie Companion for Windows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "SombieCompanion/**"
+      - "Easy Distribution/**"
+      - ".github/workflows/build-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    env:
+      SOMBIE_NO_PAUSE: "1"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Build the complete Windows ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          & cmd.exe /d /c '"Easy Distribution\build_portable_zip.bat"'
+          if ($LASTEXITCODE -ne 0) {
+            throw "The Windows packaging script failed with exit code $LASTEXITCODE."
+          }
+
+          $zip = Join-Path $env:GITHUB_WORKSPACE "Easy Distribution\SombieCompanion-Windows.zip"
+          if (!(Test-Path -LiteralPath $zip)) {
+            throw "The ZIP build did not produce SombieCompanion-Windows.zip."
+          }
+          $item = Get-Item -LiteralPath $zip
+          if ($item.Length -lt 1000000) {
+            throw "The generated ZIP is unexpectedly small ($($item.Length) bytes)."
+          }
+          Write-Host "Created $($item.FullName) ($($item.Length) bytes)"
+
+      - name: Upload ready-to-send ZIP
+        uses: actions/upload-artifact@v7
+        with:
+          name: SombieCompanion-Windows
+          path: Easy Distribution/SombieCompanion-Windows.zip
+          if-no-files-found: error
+          retention-days: 30
