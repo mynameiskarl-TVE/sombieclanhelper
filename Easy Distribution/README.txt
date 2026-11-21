@@ -1,10 +1,11 @@
 SOMBIE CLAN COMPANION - WINDOWS DISTRIBUTION
 
 EASIEST OPTION
-A GitHub Actions workflow builds the Windows ZIP automatically whenever the
-app or packaging files change. Open the repository's Actions tab, select
+A GitHub Actions workflow builds a directly extractable Windows package when
+the app or packaging files change. Open the repository's Actions tab, select
 "Build Sombie Companion for Windows", open the latest successful run, and
-download the "SombieCompanion-Windows" artifact.
+download the "SombieCompanion-Windows" artifact. If no run appears, select
+"Run workflow" on that page and choose the main branch.
 
 BUILD ON YOUR OWN WINDOWS PC
 1. Run build_portable_zip.bat.
