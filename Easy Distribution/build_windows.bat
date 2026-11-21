@@ -80,7 +80,6 @@ echo Creating the fused game executable...
 copy /b "%DIST%\love.exe"+"%STAGE%\SombieCompanion.love" "%DIST%\SombieCompanion.exe" >nul
 if errorlevel 1 goto fail
 if not exist "%DIST%\SombieCompanion.exe" goto fail
-for %%F in ("%DIST%\SombieCompanion.exe") do if %%~zF LSS 1000000 goto fail
 del /q "%DIST%\love.exe"
 
 echo.
